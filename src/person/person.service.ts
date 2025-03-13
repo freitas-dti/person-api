@@ -18,7 +18,7 @@ async savePerson(data: any): Promise<Person> {
         age: data.age,
         weight: data.weight,
         localId: data.localId,
-        createdAt: new Date(),  // Data de criação no servidor
+        createdAt: new Date(data.createdAt),  // Data de criação no servidor
         syncedAt: new Date()    // Data de sincronização
     });
 
