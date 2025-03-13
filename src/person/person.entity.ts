@@ -18,5 +18,11 @@ age: number;
 weight: number;
 
 @Column({ nullable: true })
-localId: string;  // Adicionando campo para LocalId
+localId: string;
+
+@Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+createdAt: Date;
+
+@Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+syncedAt: Date;
 }

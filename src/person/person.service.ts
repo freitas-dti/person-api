@@ -11,19 +11,26 @@ constructor(
     private personRepository: Repository<Person>,
 ) {}
 
-async savePerson(data: PersonRequest): Promise<Person> {
+async savePerson(data: any): Promise<Person> {
     const person = this.personRepository.create({
         name: data.name,
         lastName: data.lastName,
         age: data.age,
         weight: data.weight,
-        localId: data.localId  // Certifique-se que está salvando o localId
+        localId: data.localId,
+        createdAt: new Date(),  // Data de criação no servidor
+        syncedAt: new Date()    // Data de sincronização
+    });
+
+    console.log('Saving person with dates:', {
+        createdAt: person.createdAt,
+        syncedAt: person.syncedAt
     });
 
     return await this.personRepository.save(person);
 }
 
-async syncPeople(people: PersonRequest[]): Promise<string[]> {
+async syncPeople(people: any[]): Promise<string[]> {
     const syncedIds: string[] = [];
 
     try {
@@ -35,13 +42,19 @@ async syncPeople(people: PersonRequest[]): Promise<string[]> {
                 lastName: personData.lastName,
                 age: personData.age,
                 weight: personData.weight,
-                localId: personData.localId  // Salvando o LocalId
+                localId: personData.localId,
+                createdAt: new Date(personData.createdAt), // Usa a data de criação original
+                syncedAt: new Date() // Nova data de sincronização
             });
 
             const savedPerson = await this.personRepository.save(person);
             syncedIds.push(personData.localId);
             
-            console.log(`Saved person with local ID ${personData.localId}, server ID: ${savedPerson.id}`);
+            console.log(`Saved person with dates:`, {
+                localId: personData.localId,
+                createdAt: person.createdAt,
+                syncedAt: person.syncedAt
+            });
         }
 
         return syncedIds;
