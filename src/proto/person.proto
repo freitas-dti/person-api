@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package person;
+
+service PersonService {
+rpc SavePerson (PersonRequest) returns (PersonResponse);
+rpc SyncPeople (stream PersonRequest) returns (SyncResponse);
+}
+
+message PersonRequest {
+string name = 1;
+string lastName = 2;
+int32 age = 3;
+double weight = 4;
+string localId = 5;
+}
+
+message PersonResponse {
+int32 id = 1;
+string name = 2;
+string lastName = 3;
+int32 age = 4;
+double weight = 5;
+bool saved = 6;
+string message = 7;
+}
+
+message SyncResponse {
+bool success = 1;
+repeated string syncedIds = 2;
+string message = 3;
+}
