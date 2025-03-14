@@ -5,6 +5,17 @@ package person;
 service PersonService {
 rpc SavePerson (PersonRequest) returns (PersonResponse);
 rpc SyncPeople (stream PersonRequest) returns (SyncResponse);
+rpc SeedDatabase (SeedRequest) returns (SeedResponse);
+}
+
+message SeedRequest {
+int32 count = 1;
+}
+
+message SeedResponse {
+bool success = 1;
+int32 count = 2;
+string message = 3;
 }
 
 message PersonRequest {

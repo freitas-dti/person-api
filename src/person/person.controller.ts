@@ -3,10 +3,11 @@ import { GrpcMethod, GrpcStreamMethod } from '@nestjs/microservices';
 import { Observable, Subject } from 'rxjs';
 import { PersonService } from './person.service';
 import { PersonRequest, SyncResponse } from './person.interface';
+import { SeedService } from './seed.service';
 
 @Controller()
 export class PersonController {
-constructor(private personService: PersonService) {}
+constructor(private personService: PersonService, private seedService: SeedService) {}
 
 @GrpcMethod('PersonService')
 async savePerson(data: PersonRequest): Promise<any> {
@@ -64,5 +65,23 @@ return new Observable<SyncResponse>(observer => {
         }
     });
 });
+}
+
+@GrpcMethod('PersonService', 'SeedDatabase')
+async seedDatabase(data: { count: number }): Promise<any> {
+try {
+    const result = await this.seedService.seedDatabase(data.count);
+    return {
+        success: true,
+        count: result.count,
+        message: `Successfully seeded ${result.count} records`
+    };
+} catch (error) {
+    return {
+        success: false,
+        count: 0,
+        message: `Failed to seed database: ${error.message}`
+    };
+}
 }
 }
