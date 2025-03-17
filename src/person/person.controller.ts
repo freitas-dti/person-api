@@ -1,13 +1,14 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Post, Body } from '@nestjs/common';
 import { GrpcMethod, GrpcStreamMethod } from '@nestjs/microservices';
 import { Observable, Subject } from 'rxjs';
 import { PersonService } from './person.service';
-import { PersonRequest, SyncResponse } from './person.interface';
-import { SeedService } from './seed.service';
+import { PersonRequest, EmptyRequest, SyncResponse, PersonResponse } from './person.interface';
 
-@Controller()
+@Controller('api/person')
 export class PersonController {
-constructor(private personService: PersonService, private seedService: SeedService) {}
+constructor(private readonly personService: PersonService) {
+    console.log('PersonController constructor called');
+}
 
 @GrpcMethod('PersonService')
 async savePerson(data: PersonRequest): Promise<any> {
@@ -67,21 +68,59 @@ return new Observable<SyncResponse>(observer => {
 });
 }
 
-@GrpcMethod('PersonService', 'SeedDatabase')
-async seedDatabase(data: { count: number }): Promise<any> {
-try {
-    const result = await this.seedService.seedDatabase(data.count);
-    return {
-        success: true,
-        count: result.count,
-        message: `Successfully seeded ${result.count} records`
-    };
-} catch (error) {
-    return {
-        success: false,
-        count: 0,
-        message: `Failed to seed database: ${error.message}`
-    };
+@GrpcMethod('PersonService', 'GetAllPeople')
+async getAllPeople(data: EmptyRequest) {
+  console.log('GetAllPeople called in controller');
+  
+  try {
+    // Criar um Observable para streaming
+    const subject = new Subject<PersonResponse>();
+    
+    // Processar os resultados de forma assíncrona
+    (async () => {
+      try {
+        console.log('Calling service getAllPeople');
+        const iterator = this.personService.getAllPeople();
+        
+        for await (const person of iterator) {
+          console.log('Sending person:', person.id);
+          subject.next(person);
+        }
+        
+        subject.complete();
+        console.log('Finished sending all people');
+      } catch (err) {
+        console.error('Error processing stream:', err);
+        subject.error(err);
+      }
+    })();
+
+    return subject.asObservable();
+  } catch (error) {
+    console.error('Error in controller:', error);
+    throw error;
+  }
 }
+
+@GrpcMethod('PersonService', 'UpdatePerson')
+async updatePerson(data: PersonRequest): Promise<PersonResponse> {
+  console.log('Controller: UpdatePerson called with data:', data);
+  try {
+    const result = await this.personService.updatePerson(data);
+    console.log('Controller: Person updated successfully');
+    return result;
+  } catch (error) {
+    console.error('Controller: Error updating person:', error);
+    throw error;
+  }
+}
+
+@Post('generate-random')
+async generateRandomPeople(@Body() data: { count?: number }) {
+  console.log('Endpoint hit: POST /api/person/generate-random');
+  console.log('Request data:', data);
+  const result = await this.personService.generateRandomPeople(data.count || 100);
+  console.log('Result:', result);
+  return result;
 }
 }

@@ -4,6 +4,7 @@ export interface PersonRequest {
     age: number;
     weight: number;
     localId: string;
+    createdAt: string;
     }
     
     export interface PersonResponse {
@@ -12,8 +13,11 @@ export interface PersonRequest {
     lastName: string;
     age: number;
     weight: number;
+    localId: string;
     saved: boolean;
     message: string;
+    createdAt: string;
+    syncedAt: string;
     }
     
     export interface SyncResponse {
@@ -21,3 +25,6 @@ export interface PersonRequest {
     syncedIds: string[];
     message: string;
     }
+
+    export interface EmptyRequest {}
+    export interface EmptyResponse {}

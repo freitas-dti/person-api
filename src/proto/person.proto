@@ -3,19 +3,17 @@ syntax = "proto3";
 package person;
 
 service PersonService {
+// Enviar uma pessoa
 rpc SavePerson (PersonRequest) returns (PersonResponse);
+
+// Enviar múltiplas pessoas (para sincronização)
 rpc SyncPeople (stream PersonRequest) returns (SyncResponse);
-rpc SeedDatabase (SeedRequest) returns (SeedResponse);
-}
 
-message SeedRequest {
-int32 count = 1;
-}
-
-message SeedResponse {
-bool success = 1;
-int32 count = 2;
-string message = 3;
+// Ping para verificar conexão
+rpc Ping (EmptyRequest) returns (EmptyResponse);
+// Novo método para obter todas as pessoas
+rpc GetAllPeople (EmptyRequest) returns (stream PersonResponse);
+rpc UpdatePerson (PersonRequest) returns (PersonResponse);
 }
 
 message PersonRequest {
@@ -44,3 +42,6 @@ bool success = 1;
 repeated string syncedIds = 2;
 string message = 3;
 }
+
+message EmptyRequest {}
+message EmptyResponse {}

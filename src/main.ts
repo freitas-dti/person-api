@@ -4,8 +4,10 @@ import { join } from 'path';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-const app = await NestFactory.createMicroservice<MicroserviceOptions>(
-    AppModule,
+// Criar aplicação HTTP
+const app = await NestFactory.create(AppModule);
+
+app.connectMicroservice<MicroserviceOptions>(
     {
         transport: Transport.GRPC,
         options: {
@@ -16,7 +18,11 @@ const app = await NestFactory.createMicroservice<MicroserviceOptions>(
     },
 );
 
-await app.listen();
-console.log('Microservice is listening on port 50051');
+// Iniciar ambos os serviços
+await app.startAllMicroservices();
+await app.listen(3000);
+
+console.log('HTTP server running on port 3000');
+console.log('gRPC server running on port 50051');
 }
 bootstrap();

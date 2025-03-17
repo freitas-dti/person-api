@@ -17,9 +17,6 @@ age: number;
 @Column('decimal', { precision: 5, scale: 2 })
 weight: number;
 
-@Column()
-isSynced: boolean;
-
 @Column({ nullable: true })
 localId: string;
 
