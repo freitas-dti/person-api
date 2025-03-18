@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, Index } from 'typeorm';
 
 @Entity()
 export class Person {
@@ -6,6 +6,7 @@ export class Person {
 id: number;
 
 @Column()
+@Index()
 name: string;
 
 @Column()
@@ -21,8 +22,10 @@ weight: number;
 localId: string;
 
 @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+@Index()
 createdAt: Date;
 
 @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+@Index()
 syncedAt: Date;
 }
