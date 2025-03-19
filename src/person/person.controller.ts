@@ -69,40 +69,23 @@ return new Observable<SyncResponse>(observer => {
 }
 
 @GrpcMethod('PersonService', 'GetAllPeople')
-async getAllPeople(data: EmptyRequest) {
-console.log('GetAllPeople called in controller');
+async getAllPeople(data: EmptyRequest): Promise<{ items: PersonResponse[] }> {
+console.log('gRPC Controller: Starting GetAllPeople');
 const startTime = Date.now();
 
 try {
-  const subject = new Subject<PersonResponse>();
+  const people = await this.personService.getAllPeople();
   
-  // Processar os resultados de forma assíncrona com melhor controle de memória
-  (async () => {
-    try {
-      console.log('Starting stream processing');
-      let count = 0;
-      
-      for await (const person of this.personService.getAllPeople()) {
-        subject.next(person);
-        count++;
-        
-        if (count % 1000 === 0) {
-          console.log(`Streamed ${count} records`);
-        }
-      }
-      
-      const duration = Date.now() - startTime;
-      console.log(`Completed streaming ${count} records in ${duration}ms`);
-      subject.complete();
-    } catch (err) {
-      console.error('Error processing stream:', err);
-      subject.error(err);
-    }
-  })();
-
-  return subject.asObservable();
+  const duration = Date.now() - startTime;
+  console.log(`gRPC Controller: Found ${people.length} records`);
+  console.log(`gRPC Controller: Completed in ${duration}ms`);
+  
+  // Importante: retornar no formato correto
+  return {
+    items: people
+  };
 } catch (error) {
-  console.error('Error in controller:', error);
+  console.error('gRPC Controller: Error:', error);
   throw error;
 }
 }

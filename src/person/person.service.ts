@@ -83,58 +83,52 @@ async syncPeople(people: any[]): Promise<string[]> {
     }
 }
 
-async *getAllPeople(): AsyncIterableIterator<PersonResponse> {
-  console.log('getAllPeople called in service - start');
+async getAllPeople(): Promise<PersonResponse[]> {
   const startTime = Date.now();
+  console.log('gRPC Service: Starting getAllPeople');
   
   try {
-    // Usar QueryBuilder para otimizar a consulta
-    const queryBuilder = this.personRepository.createQueryBuilder('person');
-    const totalCount = await queryBuilder.getCount();
-    console.log(`Total records to process: ${totalCount}`);
+    // Usar QueryBuilder com otimizações
+    const people = await this.personRepository
+      .createQueryBuilder('person')
+      .select([
+        'person.id',
+        'person.name',
+        'person.lastName',
+        'person.age',
+        'person.weight',
+        'person.localId',
+        'person.createdAt',
+        'person.syncedAt'
+      ])
+      .orderBy('person.id')
+      .getMany();
   
-    // Processar em lotes para melhor performance
-    const batchSize = 1000;
-    let processedCount = 0;
+    console.log(`gRPC Service: Found ${people.length} records`);
   
-    while (true) {
-      const batchStartTime = Date.now();
-      
-      const people = await queryBuilder
-        .skip(processedCount)
-        .take(batchSize)
-        .getMany();
-  
-      if (people.length === 0) break;
-  
-      for (const person of people) {
-        yield {
-          id: person.id,
-          name: person.name,
-          lastName: person.lastName,
-          age: person.age,
-          weight: person.weight,
-          localId: person.localId,
-          saved: true,
-          message: '',
-          createdAt: person.createdAt?.toISOString() || '',
-          syncedAt: person.syncedAt?.toISOString() || ''
-        };
-      }
-  
-      processedCount += people.length;
-      const batchDuration = Date.now() - batchStartTime;
-      console.log(`Processed batch: ${processedCount}/${totalCount} in ${batchDuration}ms`);
-    }
+    // Mapear todos os registros de uma vez
+    const response = people.map(person => ({
+      id: person.id,
+      name: person.name,
+      lastName: person.lastName,
+      age: person.age,
+      weight: person.weight,
+      localId: person.localId,
+      saved: true,
+      message: '',
+      createdAt: person.createdAt.toISOString(),
+      syncedAt: person.syncedAt?.toISOString() || ''
+    }));
   
     const totalDuration = Date.now() - startTime;
-    console.log(`getAllPeople completed. Total time: ${totalDuration}ms`);
+    console.log(`gRPC Service: Completed getAllPeople in ${totalDuration}ms`);
+  
+    return response;
   } catch (error) {
-    console.error('Error in service getAllPeople:', error);
+    console.error('gRPC Service: Error in getAllPeople:', error);
     throw error;
   }
   }
-
 // Método de teste para verificar se o serviço está funcionando
 async test() {
   console.log('Test method called in service');

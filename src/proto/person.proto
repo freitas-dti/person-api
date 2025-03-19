@@ -12,8 +12,12 @@ rpc SyncPeople (stream PersonRequest) returns (SyncResponse);
 // Ping para verificar conexão
 rpc Ping (EmptyRequest) returns (EmptyResponse);
 // Novo método para obter todas as pessoas
-rpc GetAllPeople (EmptyRequest) returns (stream PersonResponse);
+rpc GetAllPeople (EmptyRequest) returns (GetAllPeopleResponse);
 rpc UpdatePerson (PersonRequest) returns (PersonResponse);
+}
+
+message GetAllPeopleResponse {
+  repeated PersonResponse items = 1;
 }
 
 message PersonRequest {
