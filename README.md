@@ -1,3 +1,5 @@
+# Servidor NestJS - API de Sincronização de Dados
+
 # Visão Geral
 Este servidor implementa uma API de sincronização de dados com suporte a gRPC e REST. Desenvolvido com NestJS e TypeORM, o servidor gerencia dados armazenados em um banco PostgreSQL e fornece endpoints para sincronização bidirecional com clientes.
 
